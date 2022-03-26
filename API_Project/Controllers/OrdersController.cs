@@ -6,54 +6,52 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace API_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CartsController : ControllerBase
+    public class OrdersController : ControllerBase
     {
         private readonly AlaslyFactoryContext _context;
 
-        public CartsController(AlaslyFactoryContext context)
+        public OrdersController(AlaslyFactoryContext context)
         {
             _context = context;
         }
 
-        // GET: api/Carts
-        [HttpGet]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<Cart>>> GetCarts()
-        {
-            return await _context.Carts.ToListAsync();
-        }
+        // GET: api/Orders
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        //{
+        //    return await _context.Orders.ToListAsync();
+        //}
 
-        // GET: api/Carts/5
+        // GET: api/Orders/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Cart>> GetCart(int id)
+        public async Task<ActionResult<Order>> GetOrder(int id)
         {
-            var cart = await _context.Carts.FindAsync(id);
+            var order = await _context.Orders.FindAsync(id);
 
-            if (cart == null)
+            if (order == null)
             {
                 return NotFound();
             }
 
-            return cart;
+            return order;
         }
 
-        // PUT: api/Carts/5
+        // PUT: api/Orders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCart(int id, Cart cart)
+        public async Task<IActionResult> PutOrder(int id, Order order)
         {
-            if (id != cart.Id)
+            if (id != order.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(cart).State = EntityState.Modified;
+            _context.Entry(order).State = EntityState.Modified;
 
             try
             {
@@ -61,7 +59,7 @@ namespace API_Project.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CartExists(id))
+                if (!OrderExists(id))
                 {
                     return NotFound();
                 }
@@ -74,36 +72,36 @@ namespace API_Project.Controllers
             return NoContent();
         }
 
-        // POST: api/Carts
+        // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Cart>> PostCart(Cart cart)
+        public async Task<ActionResult<Order>> PostOrder(Order order)
         {
-            _context.Carts.Add(cart);
+            _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCart", new { id = cart.Id }, cart);
+            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
         }
 
-        // DELETE: api/Carts/5
+        // DELETE: api/Orders/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCart(int id)
+        public async Task<IActionResult> DeleteOrder(int id)
         {
-            var cart = await _context.Carts.FindAsync(id);
-            if (cart == null)
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
             {
                 return NotFound();
             }
 
-            _context.Carts.Remove(cart);
+            _context.Orders.Remove(order);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool CartExists(int id)
+        private bool OrderExists(int id)
         {
-            return _context.Carts.Any(e => e.Id == id);
+            return _context.Orders.Any(e => e.Id == id);
         }
     }
 }

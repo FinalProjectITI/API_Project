@@ -35,7 +35,7 @@ namespace API_Project
             services.AddControllers();
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
             services.AddDbContext<AlaslyFactoryContext>(options =>
-    options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
+                    options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
             // For Identity  
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
