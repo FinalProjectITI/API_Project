@@ -108,7 +108,7 @@ namespace API_Project.Controllers
 
         private bool ProductExists(int id)
         {
-            return _context.Products.Any(e => e.Id == id);
+            return _context.Products.Any(e => e.ID == id);
         }
     }
 }

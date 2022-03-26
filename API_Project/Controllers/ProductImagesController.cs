@@ -101,7 +101,7 @@ namespace API_Project.Controllers
 
         private bool ProductImageExists(int id)
         {
-            return _context.ProductImages.Any(e => e.Id == id);
+            return _context.ProductImages.Any(e => e.ID == id);
         }
     }
 }
