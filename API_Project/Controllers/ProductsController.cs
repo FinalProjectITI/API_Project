@@ -26,6 +26,12 @@ namespace API_Project.Controllers
         {
             return await _context.Products.ToListAsync();
         }
+        [Route("GetInHome")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsInHome()
+        {
+            return await _context.Products.Where(p => p.ShowInHome == true).ToListAsync();
+        }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
