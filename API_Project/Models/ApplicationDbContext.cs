@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace API_Project.Models
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public  class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -17,5 +17,6 @@ namespace API_Project.Models
         {
             base.OnModelCreating(builder);
         }
+        
     }
 }
