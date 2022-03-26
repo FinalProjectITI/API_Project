@@ -8,16 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API_Project.Models
 {
-    public partial class ProductImage
+    [Table("Admin")]
+    public partial class Admin
     {
         [Key]
-        public int ID { get; set; }
+        [StringLength(200)]
+        public string UserName { get; set; }
         [Required]
-        public string ImagePath { get; set; }
-        public int ProductID { get; set; }
-
-        [ForeignKey(nameof(ProductID))]
-        [InverseProperty("ProductImages")]
-        public virtual Product Product { get; set; }
+        [StringLength(200)]
+        public string Name { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string Password { get; set; }
     }
 }

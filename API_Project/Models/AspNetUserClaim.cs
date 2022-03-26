@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API_Project.Models
 {
-    public partial class Favourit
+    [Index(nameof(UserId), Name = "IX_AspNetUserClaims_UserId")]
+    public partial class AspNetUserClaim
     {
         [Key]
-        public int ProductID { get; set; }
-        [Key]
-        public string UserID { get; set; }
+        public int Id { get; set; }
+        [Required]
+        public string UserId { get; set; }
+        public string ClaimType { get; set; }
+        public string ClaimValue { get; set; }
 
-        [ForeignKey(nameof(ProductID))]
-        [InverseProperty("Favourits")]
-        public virtual Product Product { get; set; }
-        [ForeignKey(nameof(UserID))]
-        [InverseProperty(nameof(AspNetUser.Favourits))]
+        [ForeignKey(nameof(UserId))]
+        [InverseProperty(nameof(AspNetUser.AspNetUserClaims))]
         public virtual AspNetUser User { get; set; }
     }
 }
