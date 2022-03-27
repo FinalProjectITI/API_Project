@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API_Project.Models
 {
-    public partial class Favourit
+    public partial class AspNetUserToken
     {
         [Key]
-        public int ProductID { get; set; }
+        public string UserId { get; set; }
         [Key]
-        public string UserID { get; set; }
+        public string LoginProvider { get; set; }
+        [Key]
+        public string Name { get; set; }
+        public string Value { get; set; }
 
-        [ForeignKey(nameof(ProductID))]
-        [InverseProperty("Favourits")]
-        public virtual Product Product { get; set; }
-        [ForeignKey(nameof(UserID))]
-        [InverseProperty(nameof(AspNetUser.Favourits))]
+        [ForeignKey(nameof(UserId))]
+        [InverseProperty(nameof(AspNetUser.AspNetUserTokens))]
         public virtual AspNetUser User { get; set; }
     }
 }

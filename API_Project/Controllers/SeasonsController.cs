@@ -46,7 +46,7 @@ namespace API_Project.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSeason(int id, Season season)
         {
-            if (id != season.Id)
+            if (id != season.ID)
             {
                 return BadRequest();
             }
@@ -80,7 +80,7 @@ namespace API_Project.Controllers
             _context.Seasons.Add(season);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSeason", new { id = season.Id }, season);
+            return CreatedAtAction("GetSeason", new { id = season.ID }, season);
         }
 
         // DELETE: api/Seasons/5
@@ -101,7 +101,7 @@ namespace API_Project.Controllers
 
         private bool SeasonExists(int id)
         {
-            return _context.Seasons.Any(e => e.Id == id);
+            return _context.Seasons.Any(e => e.ID == id);
         }
     }
 }

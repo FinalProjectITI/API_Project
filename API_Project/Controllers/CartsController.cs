@@ -49,7 +49,7 @@ namespace API_Project.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCart(int id, Cart cart)
         {
-            if (id != cart.Id)
+            if (id != cart.ID)
             {
                 return BadRequest();
             }
@@ -83,7 +83,7 @@ namespace API_Project.Controllers
             _context.Carts.Add(cart);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCart", new { id = cart.Id }, cart);
+            return CreatedAtAction("GetCart", new { id = cart.ID }, cart);
         }
 
         // DELETE: api/Carts/5
@@ -104,7 +104,7 @@ namespace API_Project.Controllers
 
         private bool CartExists(int id)
         {
-            return _context.Carts.Any(e => e.Id == id);
+            return _context.Carts.Any(e => e.ID == id);
         }
     }
 }

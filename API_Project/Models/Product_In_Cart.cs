@@ -8,16 +8,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API_Project.Models
 {
-    public partial class ProductImage
+    [Table("Product_In_Cart")]
+    public partial class Product_In_Cart
     {
         [Key]
-        public int ID { get; set; }
-        [Required]
-        public string ImagePath { get; set; }
         public int ProductID { get; set; }
+        [Key]
+        public int CartID { get; set; }
+        public int quantity { get; set; }
 
+        [ForeignKey(nameof(CartID))]
+        [InverseProperty("Product_In_Carts")]
+        public virtual Cart Cart { get; set; }
         [ForeignKey(nameof(ProductID))]
-        [InverseProperty("ProductImages")]
+        [InverseProperty("Product_In_Carts")]
         public virtual Product Product { get; set; }
     }
 }
