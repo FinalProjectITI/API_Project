@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
+using AutoMapper;
+using API_Project.ViewModel;
 
 namespace API_Project.Controllers
 {
@@ -13,11 +15,13 @@ namespace API_Project.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly AlaslyFactoryContext _context;
 
-        public ProductsController(AlaslyFactoryContext context)
+        public ProductsController(AlaslyFactoryContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Products
@@ -35,16 +39,27 @@ namespace API_Project.Controllers
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductVM>> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
+           
 
             if (product == null)
             {
                 return NotFound();
             }
 
-            return product;
+            ProductVM productVM = _mapper.Map<ProductVM>(product);
+
+                productVM.Images = await _context.ProductImages
+                    .Where(P => P.ProductID == product.ID)
+                    .Select(p => p.ImagePath).ToListAsync();
+            productVM.Category =_context.Categories.Find(product.CategoryID).Name;
+            productVM.Type = _context.Types.Find(product.TypeID).Name;
+            productVM.Season = _context.Seasons.Find(product.SeasonID).Name;
+
+
+            return productVM;
         }
 
         // PUT: api/Products/5
