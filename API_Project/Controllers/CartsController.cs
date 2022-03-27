@@ -6,15 +6,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_Project.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CartsController : ControllerBase
     {
         private readonly AlaslyFactoryContext _context;
-
+        
         public CartsController(AlaslyFactoryContext context)
         {
             _context = context;
@@ -25,6 +27,7 @@ namespace API_Project.Controllers
         public async Task<ActionResult<IEnumerable<Cart>>> GetCarts()
         {
             return await _context.Carts.ToListAsync();
+            
         }
 
         // GET: api/Carts/5
