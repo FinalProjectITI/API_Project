@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_Project.Controllers
 {
@@ -85,8 +87,10 @@ namespace API_Project.Controllers
 
         // DELETE: api/Carts/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCart(int id)
         {
+            string user = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var cart = await _context.Carts.FindAsync(id);
             if (cart == null)
             {
@@ -101,7 +105,10 @@ namespace API_Project.Controllers
 
         private bool CartExists(int id)
         {
+            
             return _context.Carts.Any(e => e.ID == id);
         }
+            
     }
+   
 }
