@@ -7,7 +7,12 @@ namespace API_Project.ViewModel
 {
     public class CartDetalisMV
     {
-        public List <ProductVM> ProductsVCart {get;set;}
+        public List <ProductCartMV> ProductsVCart {get;set;}
         public int TotalCartPrice { get; set; }
+
+        internal void add(ProductCartMV productCartMVV)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

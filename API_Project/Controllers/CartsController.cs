@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
 using Microsoft.AspNetCore.Authorization;
 using API_Project.ViewModel;
+using System.Security.Claims;
 
 namespace API_Project.Controllers
 {
@@ -24,173 +25,170 @@ namespace API_Project.Controllers
             _context = context;
         }
 
-        // GET: api/Carts
+        // GET: api/Cart
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cart>>> GetCarts()
+        [Route("GETCart")]
+        public ActionResult<CartDetalisMV> GetCart()
         {
-            return await _context.Carts.ToListAsync();
-        }
-
-        // GET: api/Carts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Cart>> GetCart(int id)
-        {
-            var cart = await _context.Carts.FindAsync(id);
-
-            if (cart == null)
+            try
             {
-                return NotFound();
+
+                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                int CartIDD = Cart1.ID;
+                var ListOfProduct = _context.Product_In_Carts.Where(p => p.CartID == CartIDD).ToList();
+                CartDetalisMV cartview = new CartDetalisMV();
+                cartview.TotalCartPrice = 0;
+                foreach (var item in ListOfProduct)
+                {
+                    
+                    ProductVM productVMM = new ProductVM();
+                    productVMM.Quntity = item.quantity;
+                    productVMM.Price = productVMM.Quntity * productVMM.Price;
+                    //product should appear on cart
+                    ProductCartMV productCartMVV = new ProductCartMV();
+                    productCartMVV.ProductVM = productVMM;
+                    //cart detalis vew
+                    cartview.TotalCartPrice = item.quantity;
+                    cartview.ProductsVCart.Add(productCartMVV);
+
+
+                }
+
+                return cartview;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            return cart;
         }
 
         // PUT: api/Carts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        ////////////////////******************************UPDATE function**************************************************
-        //[HttpPut]
-        //public  IActionResult PutCart([FromBody] List<ProductIds> UpdatingProduct)
-        //{
-            
-        //    string User_id = User.Identity.GetUserId();
-        //    Cart Cart1 =  _context.Carts.FirstOrDefault(C => C.UserID == User_id);
-        //   int CartIDD = Cart1.ID;
-        //    foreach( var item in UpdatingProduct)
-        //    {
-        //        var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == item.ProductID && p.CartID == CartIDD).FirstOrDefault();
-        //        if (item.Quntity > 0)
-        //        {
-        //            ProductOfCart.quantity = item.Quntity;
-        //             _context.SaveChanges();
-        //        } 
-        //        else
-        //            return BadRequest(new Response { Status = "Erro", Message = "quntity no valid successfully!" });
-        //    }
+        // To protect from overposting attacks, see
+        //////////////////******************************UPDATE function**************************************************
+        [HttpPut]
+        [Route("UpdateCart")]
+        public IActionResult PutCart([FromBody] List<ProductIds> UpdatingProduct)
+        {
+
+            string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+            int CartIDD = Cart1.ID;
+            foreach (var item in UpdatingProduct)
+            {
+                var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == item.ProductID && p.CartID == CartIDD).FirstOrDefault();
+                if (item.Quntity > 0)
+                {
+                    ProductOfCart.quantity = item.Quntity;
+                    _context.SaveChanges();
+                }
+                else
+                    return BadRequest(new Response { Status = "Erro", Message = "quntity no valid successfully!" });
+            }
 
 
 
-        //    //if (id != cart.ID)
-        //    //{
-        //    //    return BadRequest();
-        //    //}
+            return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+        }
+        //********************************************ADD TO CART FUNCTION**********************************************************
+        // POST: api/Carts
+        
+        [HttpPost("{id}")]
+        [Route("AddToCart")]
+        public async Task<ActionResult> PostToCart(int Product_id)
+        {
+            try
+            {
+                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
 
-        //    //_context.Entry(cart).State = EntityState.Modified;
+                if (Cart1 == null)
+                {
+                    Cart NewCart = new Cart() { UserID = Cart1.UserID };
+                    _context.Carts.Add(Cart1);
+                    await _context.SaveChangesAsync();
+                    Cart1.UserID = NewCart.UserID;
+                    Cart1.ID = NewCart.ID;
+                }
+                Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
+                if (ProductAdded == null)
+                {
+                    return BadRequest(new Response { Status = "Error", Message = "product Null!" });
+                }
+                ProductInCart P = new ProductInCart()
+                {
+                    CartId = Cart1.ID,
+                    Quantity = 1
 
-        //    //try
-        //    //{
-        //    //    await _context.SaveChangesAsync();
-        //    //}
-        //    //catch (DbUpdateConcurrencyException)
-        //    //{
-        //    //    if (!CartExists(id))
-        //    //    {
-        //    //        return NotFound();
-        //    //    }
-        //    //    else
-        //    //    {
-        //    //        throw;
-        //    //    }
-        //    //}
-
-        //    return Ok(new Response { Status = "Success", Message = "product added successfully!" });
-        //}
-        ////********************************************ADD TO CART FUNCTION**********************************************************
-        //// POST: api/Carts
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost("{id}")]
-        //public async Task<ActionResult> PostToCart(int Product_id)
-        //{
-        //    try
-        //    {
-        //        string User_id = User.Identity.GetUserId();
-        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == User_id);
-
-        //        if (Cart1 == null)
-        //        {
-        //            Cart NewCart = new Cart() { UserID = Cart1.UserID };
-        //            _context.Carts.Add(Cart1);
-        //            await _context.SaveChangesAsync();
-        //            Cart1.UserID = NewCart.UserID;
-        //            Cart1.ID = NewCart.ID;
-        //        }
-        //        Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
-        //        if (ProductAdded == null)
-        //        {
-        //            return BadRequest(new Response { Status = "Error", Message = "product Null!" });
-        //        }
-        //        ProductInCart P = new ProductInCart()
-        //        {
-        //            CartId = Cart1.ID,
-        //            Quantity = 1
-
-        //        };
-        //        return Ok(new Response { Status = "Success", Message = "product added successfully!" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
+                };
+                return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
 
 
-        //}
-        ////****************************************DELETE FROM CART FUNCTION*************************************************************************
+        }
+        //****************************************DELETE FROM CART FUNCTION*************************************************************************
 
-        //// DELETE: api/Carts/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteFromCart(int Product_id)
-        //{
+        // DELETE: api/Carts/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFromCart(int Product_id)
+        {
 
-        //    try
-        //    {
-        //        string User_id = User.Identity.GetUserId();
-        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == User_id);
-        //        int CartIDD = Cart1.ID;
-        //        var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == Product_id && p.CartID == CartIDD).FirstOrDefault();
-        //        _context.Product_In_Carts.Remove(ProductOfCart);
+            try
+            {
+                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                int CartIDD = Cart1.ID;
+                var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == Product_id && p.CartID == CartIDD).FirstOrDefault();
+                _context.Product_In_Carts.Remove(ProductOfCart);
 
-        //        await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-        //        return Ok(new Response { Status = "Success", Message = "product removed from cart successfully!" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
+                return Ok(new Response { Status = "Success", Message = "product removed from cart successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
 
-        //}
+        }
         ////***********************************************************Delete CART***************************************************************************
-        //[HttpDelete]
-        //public  IActionResult DeleteCart()
-        //{
+        [HttpDelete]
+            public IActionResult DeleteCart()
+            {
 
-        //    try
-        //    {
-        //        string User_id = User.Identity.GetUserId();
-        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == User_id);
-        //        int CartIDD = Cart1.ID;
-        //        var ProductsOfCart = _context.Product_In_Carts.Where(d => d.CartID == CartIDD).ToList();
-        //        foreach (var ProductItem in ProductsOfCart)
-        //        {
-        //            _context.Product_In_Carts.Remove(ProductItem);
-
-
-        //        }
-        //        _context.SaveChanges();
+                try
+                {
+                    string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                    int CartIDD = Cart1.ID;
+                    var ProductsOfCart = _context.Product_In_Carts.Where(d => d.CartID == CartIDD).ToList();
+                    foreach (var ProductItem in ProductsOfCart)
+                    {
+                        _context.Product_In_Carts.Remove(ProductItem);
 
 
-        //        return Ok(new Response { Status = "Success", Message = "cart Deleted successfully!" });
-        //    }
+                    }
+                    _context.SaveChanges();
 
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
 
-        //}
-    
-    }
+                    return Ok(new Response { Status = "Success", Message = "cart Deleted successfully!" });
+                }
+
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+
+            }
+
+        }
 
 
 }
