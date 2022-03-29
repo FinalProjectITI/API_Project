@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
+using AutoMapper;
+using API_Project.ViewModel;
 
 namespace API_Project.Controllers
 {
@@ -13,40 +15,125 @@ namespace API_Project.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly AlaslyFactoryContext _context;
 
-        public ProductsController(AlaslyFactoryContext context)
+        public ProductsController(AlaslyFactoryContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Products
+        [Route("GetProducts/{start}/{categoryId}")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start,int categoryId)
         {
-            return await _context.Products.ToListAsync();
+            try
+            {
+                List<ProductVM> ProductsWithImage = new List<ProductVM>();
+                List<Product> products = await _context.Products.Where(P => P.CategoryID == categoryId)
+                    .Skip(start).Take(20).ToListAsync();
+                if (products != null)
+                {
+                    foreach (var product in products)
+                    {
+                        ProductVM productVM = _mapper.Map<ProductVM>(product);
+
+                        productVM.FirstImage = _context.ProductImages
+                            .Where(P => P.ProductID == product.ID)
+                            .Select(p => p.ImagePath).FirstOrDefault();
+                        productVM.Category = _context.Categories.Find(product.CategoryID).Name;
+                        productVM.Type = _context.Types.Find(product.TypeID).Name;
+                        productVM.Season = _context.Seasons.Find(product.SeasonID).Name;
+
+                        ProductsWithImage.Add(productVM);
+                    }
+                    return ProductsWithImage;
+                }
+                else
+                    return NotFound();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
-        [Route("GetInHome")]
+
+        [Route("GetInHome/{start}/{categoryId}")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProductsInHome()
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome(int start, int categoryId)
         {
-            return await _context.Products.Where(p => p.ShowInHome == true).ToListAsync();
+            try
+            {
+                List<ProductVM> ProductsWithImage = new List<ProductVM>();
+                List<Product> products = await _context.Products
+                    .Where(P => P.CategoryID == categoryId && P.ShowInHome == true)
+                    .Skip(start).Take(20).ToListAsync();
+
+                if (products != null)
+                {
+                    foreach (var product in products)
+                    {
+                        ProductVM productVM = _mapper.Map<ProductVM>(product);
+
+                        productVM.FirstImage = _context.ProductImages
+                            .Where(P => P.ProductID == product.ID)
+                            .Select(p => p.ImagePath).FirstOrDefault();
+                        productVM.Category = _context.Categories.Find(product.CategoryID).Name;
+                        productVM.Type = _context.Types.Find(product.TypeID).Name;
+                        productVM.Season = _context.Seasons.Find(product.SeasonID).Name;
+
+                        ProductsWithImage.Add(productVM);
+                    }
+                    return ProductsWithImage;
+                }
+                else
+                    return NotFound();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            //return await _context.Products.Where(p => p.ShowInHome == true).ToListAsync();
         }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductVM>> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-
-            if (product == null)
+            try
             {
-                return NotFound();
-            }
+                var product = await _context.Products.FindAsync(id);
 
-            return product;
+
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                ProductVM productVM = _mapper.Map<ProductVM>(product);
+
+                productVM.Images = await _context.ProductImages
+                    .Where(P => P.ProductID == product.ID)
+                    .Select(p => p.ImagePath).ToListAsync();
+                productVM.Category = _context.Categories.Find(product.CategoryID).Name;
+                productVM.Type = _context.Types.Find(product.TypeID).Name;
+                productVM.Season = _context.Seasons.Find(product.SeasonID).Name;
+
+
+                return productVM;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
+        #region Extra
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         //[HttpPut("{id}")]
@@ -104,11 +191,12 @@ namespace API_Project.Controllers
         //    await _context.SaveChangesAsync();
 
         //    return NoContent();
-        //}
+        //} 
+        #endregion
 
         private bool ProductExists(int id)
         {
-            return _context.Products.Any(e => e.Id == id);
+            return _context.Products.Any(e => e.ID == id);
         }
     }
 }
