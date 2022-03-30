@@ -69,8 +69,8 @@ namespace API_Project.Controllers
             {
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
                 List<Product> products = await _context.Products
-                    .Where(P => P.CategoryID == categoryId && P.ShowInHome == true)
-                    .Skip(start).Take(20).ToListAsync();
+                    .Where(P=> P.ShowInHome == true).ToListAsync();
+                //.Skip(start).Take(20).ToListAsync();
 
                 if (products != null)
                 {

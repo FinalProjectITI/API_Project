@@ -46,7 +46,7 @@ namespace API_Project.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder(int id, Order order)
         {
-            if (id != order.Id)
+            if (id != order.ID)
             {
                 return BadRequest();
             }
@@ -80,7 +80,7 @@ namespace API_Project.Controllers
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+            return CreatedAtAction("GetOrder", new { id = order.ID }, order);
         }
 
         // DELETE: api/Orders/5
@@ -101,7 +101,7 @@ namespace API_Project.Controllers
 
         private bool OrderExists(int id)
         {
-            return _context.Orders.Any(e => e.Id == id);
+            return _context.Orders.Any(e => e.ID == id);
         }
     }
 }

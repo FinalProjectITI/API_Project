@@ -61,7 +61,7 @@ namespace API_Project.Controllers
             }
             catch (DbUpdateException)
             {
-                if (FavouritExists(favourit.ProductId))
+                if (FavouritExists(favourit.ProductID))
                 {
                     return Conflict();
                 }
@@ -71,7 +71,7 @@ namespace API_Project.Controllers
                 }
             }
 
-            return CreatedAtAction("GetFavourit", new { id = favourit.ProductId }, favourit);
+            return CreatedAtAction("GetFavourit", new { id = favourit.ProductID }, favourit);
         }
 
         // DELETE: api/Favourits/5
@@ -92,7 +92,7 @@ namespace API_Project.Controllers
 
         private bool FavouritExists(int id)
         {
-            return _context.Favourits.Any(e => e.ProductId == id);
+            return _context.Favourits.Any(e => e.ProductID == id);
         }
     }
 }
