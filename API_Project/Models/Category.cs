@@ -26,5 +26,10 @@ namespace API_Project.Models
 
         [InverseProperty(nameof(Product.Category))]
         public virtual ICollection<Product> Products { get; set; }
+
+        public static explicit operator string(Category v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
