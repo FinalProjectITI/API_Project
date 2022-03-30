@@ -44,12 +44,24 @@ namespace API_Project.Controllers
                     
                     ProductVM productVMM = new ProductVM();
                     productVMM.Quntity = item.quantity;
-                    productVMM.Price = productVMM.Quntity * productVMM.Price;
+                    productVMM.Price = item.Product.Price;
+                    productVMM.Name = item.Product.Name;
+                    productVMM.ID = item.Product.ID;
+                    productVMM.Images = (List<string>)item.Product.ProductImages;
+                    productVMM.Category = item.Product.Category.Name;
+                    productVMM.Season = item.Product.Season.Name;
+
+                    
+
                     //product should appear on cart
                     ProductCartMV productCartMVV = new ProductCartMV();
                     productCartMVV.ProductVM = productVMM;
+                    productCartMVV.QuntityOfProduct = productVMM.Quntity;
+                    productCartMVV.TotalPrice = (int)(productCartMVV.QuntityOfProduct * productVMM.Price);
+                 
+
                     //cart detalis vew
-                    cartview.TotalCartPrice = item.quantity;
+                    cartview.TotalCartPrice = 2000;
                     cartview.ProductsVCart.Add(productCartMVV);
 
 
@@ -94,14 +106,14 @@ namespace API_Project.Controllers
         //********************************************ADD TO CART FUNCTION**********************************************************
         // POST: api/Carts
         
-        //[HttpPost("{id}")]
-        //[Route("AddToCart")]
-        //public async Task<ActionResult> PostToCart(int Product_id)
-        //{
-        //    try
-        //    {
-        //        string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+        [HttpPost("{id}")]
+        
+        public async Task<ActionResult> PostToCart(int Product_id)
+        {
+            try
+            {
+                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
 
         //        if (Cart1 == null)
         //        {
@@ -121,13 +133,13 @@ namespace API_Project.Controllers
         //            CartId = Cart1.ID,
         //            Quantity = 1
 
-        //        };
-        //        return Ok(new Response { Status = "Success", Message = "product added successfully!" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
+                };
+                return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
 
 

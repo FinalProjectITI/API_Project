@@ -24,5 +24,10 @@ namespace API_Project.Models
 
         [InverseProperty(nameof(Product.Season))]
         public virtual ICollection<Product> Products { get; set; }
+
+        public static explicit operator string(Season v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
