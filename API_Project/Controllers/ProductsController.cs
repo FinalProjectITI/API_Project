@@ -61,9 +61,12 @@ namespace API_Project.Controllers
             }
         }
 
-        [Route("GetInHome/{start}/{categoryId}")]
+        //[Route("GetInHome/{start}/{categoryId}")]
+        [Route("GetInHome")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome(int start, int categoryId)
+
+        //        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome(int start, int categoryId)
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome()
         {
             try
             {
