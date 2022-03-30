@@ -94,45 +94,45 @@ namespace API_Project.Controllers
         //********************************************ADD TO CART FUNCTION**********************************************************
         // POST: api/Carts
         
-        [HttpPost("{id}")]
-        [Route("AddToCart")]
-        public async Task<ActionResult> PostToCart(int Product_id)
-        {
-            try
-            {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+        //[HttpPost("{id}")]
+        //[Route("AddToCart")]
+        //public async Task<ActionResult> PostToCart(int Product_id)
+        //{
+        //    try
+        //    {
+        //        string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
 
-                if (Cart1 == null)
-                {
-                    Cart NewCart = new Cart() { UserID = Cart1.UserID };
-                    _context.Carts.Add(Cart1);
-                    await _context.SaveChangesAsync();
-                    Cart1.UserID = NewCart.UserID;
-                    Cart1.ID = NewCart.ID;
-                }
-                Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
-                if (ProductAdded == null)
-                {
-                    return BadRequest(new Response { Status = "Error", Message = "product Null!" });
-                }
-                ProductInCart P = new ProductInCart()
-                {
-                    CartId = Cart1.ID,
-                    Quantity = 1
+        //        if (Cart1 == null)
+        //        {
+        //            Cart NewCart = new Cart() { UserID = Cart1.UserID };
+        //            _context.Carts.Add(Cart1);
+        //            await _context.SaveChangesAsync();
+        //            Cart1.UserID = NewCart.UserID;
+        //            Cart1.ID = NewCart.ID;
+        //        }
+        //        Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
+        //        if (ProductAdded == null)
+        //        {
+        //            return BadRequest(new Response { Status = "Error", Message = "product Null!" });
+        //        }
+        //        ProductInCart P = new ProductInCart()
+        //        {
+        //            CartId = Cart1.ID,
+        //            Quantity = 1
 
-                };
-                return Ok(new Response { Status = "Success", Message = "product added successfully!" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+        //        };
+        //        return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
 
 
 
-        }
-        //****************************************DELETE FROM CART FUNCTION*************************************************************************
+        //}
+        ////****************************************DELETE FROM CART FUNCTION*************************************************************************
 
         // DELETE: api/Carts/5
         [HttpDelete("{id}")]
