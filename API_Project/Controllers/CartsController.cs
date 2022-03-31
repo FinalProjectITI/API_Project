@@ -44,12 +44,24 @@ namespace API_Project.Controllers
                     
                     ProductVM productVMM = new ProductVM();
                     productVMM.Quntity = item.quantity;
-                    productVMM.Price = productVMM.Quntity * productVMM.Price;
+                    productVMM.Price = item.Product.Price;
+                    productVMM.Name = item.Product.Name;
+                    productVMM.ID = item.Product.ID;
+                    productVMM.Images = (List<string>)item.Product.ProductImages;
+                    productVMM.Category = item.Product.Category.Name;
+                    productVMM.Season = item.Product.Season.Name;
+
+                    
+
                     //product should appear on cart
                     ProductCartMV productCartMVV = new ProductCartMV();
                     productCartMVV.ProductVM = productVMM;
+                    productCartMVV.QuntityOfProduct = productVMM.Quntity;
+                    productCartMVV.TotalPrice = (int)(productCartMVV.QuntityOfProduct * productVMM.Price);
+                 
+
                     //cart detalis vew
-                    cartview.TotalCartPrice = item.quantity;
+                    cartview.TotalCartPrice = 2000;
                     cartview.ProductsVCart.Add(productCartMVV);
 
 
@@ -95,7 +107,7 @@ namespace API_Project.Controllers
         // POST: api/Carts
         
         [HttpPost("{id}")]
-        [Route("AddToCart")]
+        
         public async Task<ActionResult> PostToCart(int Product_id)
         {
             try
@@ -103,23 +115,23 @@ namespace API_Project.Controllers
                 string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
 
-                if (Cart1 == null)
-                {
-                    Cart NewCart = new Cart() { UserID = Cart1.UserID };
-                    _context.Carts.Add(Cart1);
-                    await _context.SaveChangesAsync();
-                    Cart1.UserID = NewCart.UserID;
-                    Cart1.ID = NewCart.ID;
-                }
-                Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
-                if (ProductAdded == null)
-                {
-                    return BadRequest(new Response { Status = "Error", Message = "product Null!" });
-                }
-                ProductInCart P = new ProductInCart()
-                {
-                    CartId = Cart1.ID,
-                    Quantity = 1
+        //        if (Cart1 == null)
+        //        {
+        //            Cart NewCart = new Cart() { UserID = Cart1.UserID };
+        //            _context.Carts.Add(Cart1);
+        //            await _context.SaveChangesAsync();
+        //            Cart1.UserID = NewCart.UserID;
+        //            Cart1.ID = NewCart.ID;
+        //        }
+        //        Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
+        //        if (ProductAdded == null)
+        //        {
+        //            return BadRequest(new Response { Status = "Error", Message = "product Null!" });
+        //        }
+        //        ProductInCart P = new ProductInCart()
+        //        {
+        //            CartId = Cart1.ID,
+        //            Quantity = 1
 
                 };
                 return Ok(new Response { Status = "Success", Message = "product added successfully!" });
@@ -131,8 +143,8 @@ namespace API_Project.Controllers
 
 
 
-        }
-        //****************************************DELETE FROM CART FUNCTION*************************************************************************
+        //}
+        ////****************************************DELETE FROM CART FUNCTION*************************************************************************
 
         // DELETE: api/Carts/5
         [HttpDelete("{id}")]
