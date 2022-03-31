@@ -95,7 +95,7 @@ namespace API_Project.Controllers
                 else
                     return NotFound();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
