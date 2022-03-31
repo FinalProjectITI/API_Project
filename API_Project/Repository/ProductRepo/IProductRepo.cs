@@ -11,7 +11,9 @@ namespace API_Project.Repository
     {
           Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId);
          Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome();
-          Task<ActionResult<ProductVM>> GetProduct(int id);
+        Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey,int start);
+
+        Task<ActionResult<ProductVM>> GetProduct(int id);
 
 
     }

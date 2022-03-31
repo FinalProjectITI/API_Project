@@ -120,5 +120,42 @@ namespace API_Project.Repository.ProductRepo
                 throw;
             }
         }
+
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey,int start)
+        {
+
+            try
+            {
+                List<ProductVM> ProductsWithImage = new List<ProductVM>();
+                List<Product> products = await _context.Products
+                    .Where(P => P.Name.Contains(searchKey) )
+                    .Skip(start).Take(20).ToListAsync();
+
+                if (products != null)
+                {
+                    foreach (var product in products)
+                    {
+                        ProductVM productVM = _mapper.Map<ProductVM>(product);
+
+                        productVM.FirstImage = _context.ProductImages
+                            .Where(P => P.ProductID == product.ID)
+                            .Select(p => p.ImagePath).FirstOrDefault();
+                        productVM.Category = _context.Categories.Find(product.CategoryID).Name;
+                        productVM.Type = _context.Types.Find(product.TypeID).Name;
+                        productVM.Season = _context.Seasons.Find(product.SeasonID).Name;
+
+                        ProductsWithImage.Add(productVM);
+                    }
+                    return ProductsWithImage;
+                }
+                else
+                    return new NotFoundResult();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

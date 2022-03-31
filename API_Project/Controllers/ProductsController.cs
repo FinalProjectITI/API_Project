@@ -31,6 +31,15 @@ namespace API_Project.Controllers
 
         }
 
+        //
+        [Route("search/{searchKey}/{start}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey, int start)
+        {
+            return await _productRepo.GetSearchResult(searchKey,start);
+
+        }
+
         //[Route("GetInHome/{start}/{categoryId}")]
         [Route("GetInHome")]
         [HttpGet]
