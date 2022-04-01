@@ -33,6 +33,7 @@ namespace API_Project
         {
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
+            services.AddHttpContextAccessor();
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
             services.AddDbContext<AlaslyFactoryContext>(options =>
     options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
@@ -79,9 +80,9 @@ namespace API_Project
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
