@@ -9,7 +9,8 @@ namespace API_Project.ViewModel
 {
     public class ProductVM
     {
-        public ProductVM()
+       
+        public  ProductVM()
         {
             
         }
@@ -27,8 +28,11 @@ namespace API_Project.ViewModel
         public string Category { get; set; }
         public string Type { get; set; }
         public string Season { get; set; }
+        public int CategoryID { get; set; }
+        public int TypeID { get; set; }
+        public int SeasonID { get; set; }
         public bool ShowInHome { get; set; }
-
+        public string FirstImage { get; set; }
         public List<string> Images { get; set; }
     }
 }

@@ -4,10 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using API_Project.ViewModel;
 
 namespace API_Project.Controllers
 {
@@ -15,11 +18,15 @@ namespace API_Project.Controllers
     [ApiController]
     public class CartsController : ControllerBase
     {
-        private readonly AlaslyFactoryContext _context;
+        private AlaslyFactoryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CartsController(AlaslyFactoryContext context)
+        public CartsController(AlaslyFactoryContext context, IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         // GET: api/Carts
@@ -31,84 +38,166 @@ namespace API_Project.Controllers
 
         // GET: api/Carts/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Cart>> GetCart(int id)
         {
+            var user_Id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+           // string User_id = User.Identity.Name();
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
             var cart = await _context.Carts.FindAsync(id);
+            //var principal = new ClaimsPrincipal();
+           // var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (cart == null)
+            if (userId == null)
             {
                 return NotFound();
             }
-
             return cart;
         }
 
         // PUT: api/Carts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCart(int id, Cart cart)
-        {
-            if (id != cart.ID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(cart).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CartExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Carts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Cart>> PostCart(Cart cart)
-        {
-            _context.Carts.Add(cart);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCart", new { id = cart.ID }, cart);
-        }
-
-        // DELETE: api/Carts/5
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteCart(int id)
-        {
-            string user = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var cart = await _context.Carts.FindAsync(id);
-            if (cart == null)
-            {
-                return NotFound();
-            }
-
-            _context.Carts.Remove(cart);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CartExists(int id)
-        {
+        ////////////////////******************************UPDATE function**************************************************
+        //[HttpPut]
+        //public  IActionResult PutCart([FromBody] List<ProductIds> UpdatingProduct)
+        //{
             
-            return _context.Carts.Any(e => e.ID == id);
-        }
-            
+        //    string User_id = User.Identity.GetUserId();
+        //    Cart Cart1 =  _context.Carts.FirstOrDefault(C => C.UserID == User_id);
+        //   int CartIDD = Cart1.ID;
+        //    foreach( var item in UpdatingProduct)
+        //    {
+        //        var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == item.ProductID && p.CartID == CartIDD).FirstOrDefault();
+        //        if (item.Quntity > 0)
+        //        {
+        //            ProductOfCart.quantity = item.Quntity;
+        //             _context.SaveChanges();
+        //        } 
+        //        else
+        //            return BadRequest(new Response { Status = "Erro", Message = "quntity no valid successfully!" });
+        //    }
+
+
+
+        //    //if (id != cart.ID)
+        //    //{
+        //    //    return BadRequest();
+        //    //}
+
+        //    //_context.Entry(cart).State = EntityState.Modified;
+
+        //    //try
+        //    //{
+        //    //    await _context.SaveChangesAsync();
+        //    //}
+        //    //catch (DbUpdateConcurrencyException)
+        //    //{
+        //    //    if (!CartExists(id))
+        //    //    {
+        //    //        return NotFound();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        throw;
+        //    //    }
+        //    //}
+
+        //    return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+        //}
+        ////********************************************ADD TO CART FUNCTION**********************************************************
+        //// POST: api/Carts
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost("{id}")]
+        //public async Task<ActionResult> PostToCart(int Product_id)
+        //{
+        //    try
+        //    {
+        //        string User_id = User.Identity.GetUserId();
+        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == User_id);
+
+        //        if (Cart1 == null)
+        //        {
+        //            Cart NewCart = new Cart() { UserID = Cart1.UserID };
+        //            _context.Carts.Add(Cart1);
+        //            await _context.SaveChangesAsync();
+        //            Cart1.UserID = NewCart.UserID;
+        //            Cart1.ID = NewCart.ID;
+        //        }
+        //        Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
+        //        if (ProductAdded == null)
+        //        {
+        //            return BadRequest(new Response { Status = "Error", Message = "product Null!" });
+        //        }
+        //        ProductInCart P = new ProductInCart()
+        //        {
+        //            CartId = Cart1.ID,
+        //            Quantity = 1
+
+        //        };
+        //        return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+
+
+
+        //}
+        ////****************************************DELETE FROM CART FUNCTION*************************************************************************
+
+        //// DELETE: api/Carts/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteFromCart(int Product_id)
+        //{
+
+        //    try
+        //    {
+        //        string User_id = User.Identity.GetUserId();
+        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == User_id);
+        //        int CartIDD = Cart1.ID;
+        //        var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == Product_id && p.CartID == CartIDD).FirstOrDefault();
+        //        _context.Product_In_Carts.Remove(ProductOfCart);
+
+        //        await _context.SaveChangesAsync();
+
+        //        return Ok(new Response { Status = "Success", Message = "product removed from cart successfully!" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+
+
+        //}
+        ////***********************************************************Delete CART***************************************************************************
+        //[HttpDelete]
+        //public  IActionResult DeleteCart()
+        //{
+
+        //    try
+        //    {
+        //        string User_id = User.Identity.GetUserId();
+        //        Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == User_id);
+        //        int CartIDD = Cart1.ID;
+        //        var ProductsOfCart = _context.Product_In_Carts.Where(d => d.CartID == CartIDD).ToList();
+        //        foreach (var ProductItem in ProductsOfCart)
+        //        {
+        //            _context.Product_In_Carts.Remove(ProductItem);
+
+
+        //        }
+        //        _context.SaveChanges();
+
+
+        //        return Ok(new Response { Status = "Success", Message = "cart Deleted successfully!" });
+        //    }
+
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
+     
     }
-   
 }
