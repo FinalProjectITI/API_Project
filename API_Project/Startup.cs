@@ -38,6 +38,7 @@ namespace API_Project
             {
                 options.AddDefaultPolicy(
                     builder =>
+
                     {
                         builder.WithOrigins()
                                             .AllowAnyHeader()
