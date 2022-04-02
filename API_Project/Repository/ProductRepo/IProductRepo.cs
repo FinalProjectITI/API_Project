@@ -15,6 +15,8 @@ namespace API_Project.Repository
 
         Task<ActionResult<ProductVM>> GetProduct(int id);
 
+        public ActionResult<int> GetCount(int categoryId);
+
 
     }
 }
