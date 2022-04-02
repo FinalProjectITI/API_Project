@@ -44,7 +44,7 @@ namespace API_Project.Controllers
                     
                     ProductVM productVMM = new ProductVM();
                     productVMM.Quntity = item.quantity;
-                    productVMM.Price = item.Product.Price;
+                    productVMM.Price = (double)(item.Product.Price - item.Product.Discount);
                     productVMM.Name = item.Product.Name;
                     productVMM.ID = item.Product.ID;
                     productVMM.Images = (List<string>)item.Product.ProductImages;
@@ -58,16 +58,16 @@ namespace API_Project.Controllers
                     productCartMVV.ProductVM = productVMM;
                     productCartMVV.QuntityOfProduct = productVMM.Quntity;
                     productCartMVV.TotalPrice = (int)(productCartMVV.QuntityOfProduct * productVMM.Price);
-                 
+                    
 
                     //cart detalis vew
-                    cartview.TotalCartPrice = 2000;
+                    cartview.TotalCartPrice += productCartMVV.TotalPrice;
                     cartview.ProductsVCart.Add(productCartMVV);
 
 
                 }
 
-                return cartview;
+                return Ok(cartview);
             }
             catch (Exception ex)
             {
@@ -105,10 +105,10 @@ namespace API_Project.Controllers
         }
         //********************************************ADD TO CART FUNCTION**********************************************************
         // POST: api/Carts
+        [Route("postToCart/{Product_id}/{quntity}")]
+        [HttpPost]
         
-        [HttpPost("{id}")]
-        
-        public async Task<ActionResult> PostToCart(int Product_id)
+        public async Task<ActionResult> PostToCart(int Product_id,int quntity)
         {
             try
             {
@@ -131,7 +131,7 @@ namespace API_Project.Controllers
                 ProductInCart P = new ProductInCart()
                 {
                     CartId = Cart1.ID,
-                    Quantity = 1
+                    Quantity = quntity,
 
                 };
                 await _context.SaveChangesAsync();
