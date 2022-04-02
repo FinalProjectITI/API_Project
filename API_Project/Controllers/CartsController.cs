@@ -131,10 +131,11 @@ namespace API_Project.Controllers
                 ProductInCart P = new ProductInCart()
                 {
                     CartId = Cart1.ID,
-                    Quantity = quntity,
+                    Quantity = quntity
+                };
 
-                //}; 
-                #endregion
+                
+                
                 return Ok(new Response { Status = "Success", Message = "product added successfully!" });
             }
             catch (Exception ex)
