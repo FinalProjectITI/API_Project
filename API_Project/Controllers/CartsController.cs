@@ -19,10 +19,13 @@ namespace API_Project.Controllers
     public class CartsController : ControllerBase
     {
         private AlaslyFactoryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        
 
-        public CartsController(AlaslyFactoryContext context)
+        public CartsController(AlaslyFactoryContext context,IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/Cart
@@ -33,7 +36,8 @@ namespace API_Project.Controllers
             try
             {
 
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                 int CartIDD = Cart1.ID;
                 var ListOfProduct = _context.Product_In_Carts.Where(p => p.CartID == CartIDD).ToList();
@@ -83,9 +87,9 @@ namespace API_Project.Controllers
         [Route("UpdateCart")]
         public IActionResult PutCart([FromBody] List<ProductIds> UpdatingProduct)
         {
-
-            string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+            string UserName = User.FindFirstValue(ClaimTypes.Name);
+            var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+            Cart Cart1 = _context.Carts.Where(C => C.UserID == user_id).FirstOrDefault();
             int CartIDD = Cart1.ID;
             foreach (var item in UpdatingProduct)
             {
@@ -112,7 +116,8 @@ namespace API_Project.Controllers
         {
             try
             {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
 
                 if (Cart1 == null)
@@ -155,7 +160,8 @@ namespace API_Project.Controllers
 
             try
             {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                 int CartIDD = Cart1.ID;
                 var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == Product_id && p.CartID == CartIDD).FirstOrDefault();
@@ -179,8 +185,9 @@ namespace API_Project.Controllers
 
                 try
                 {
-                    string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                     int CartIDD = Cart1.ID;
                     var ProductsOfCart = _context.Product_In_Carts.Where(d => d.CartID == CartIDD).ToList();
                     foreach (var ProductItem in ProductsOfCart)
