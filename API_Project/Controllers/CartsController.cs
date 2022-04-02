@@ -21,13 +21,12 @@ namespace API_Project.Controllers
     {
         private AlaslyFactoryContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserManager<ApplicationUser> _userManager;
+        
 
-        public CartsController(AlaslyFactoryContext context, IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager)
+        public CartsController(AlaslyFactoryContext context,IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
-            _userManager = userManager;
         }
 
         // GET: api/Cart
@@ -38,7 +37,8 @@ namespace API_Project.Controllers
             try
             {
 
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                 int CartIDD = Cart1.ID;
                 var ListOfProduct = _context.Product_In_Carts.Where(p => p.CartID == CartIDD).ToList();
@@ -49,7 +49,7 @@ namespace API_Project.Controllers
                     
                     ProductVM productVMM = new ProductVM();
                     productVMM.Quntity = item.quantity;
-                    productVMM.Price = item.Product.Price;
+                    productVMM.Price = (double)(item.Product.Price - item.Product.Discount);
                     productVMM.Name = item.Product.Name;
                     productVMM.ID = item.Product.ID;
                     productVMM.Images = (List<string>)item.Product.ProductImages;
@@ -63,16 +63,16 @@ namespace API_Project.Controllers
                     productCartMVV.ProductVM = productVMM;
                     productCartMVV.QuntityOfProduct = productVMM.Quntity;
                     productCartMVV.TotalPrice = (int)(productCartMVV.QuntityOfProduct * productVMM.Price);
-                 
+                    
 
                     //cart detalis vew
-                    cartview.TotalCartPrice = 2000;
+                    cartview.TotalCartPrice += productCartMVV.TotalPrice;
                     cartview.ProductsVCart.Add(productCartMVV);
 
 
                 }
 
-                return cartview;
+                return Ok(cartview);
             }
             catch (Exception ex)
             {
@@ -88,9 +88,9 @@ namespace API_Project.Controllers
         [Route("UpdateCart")]
         public IActionResult PutCart([FromBody] List<ProductIds> UpdatingProduct)
         {
-
-            string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+            string UserName = User.FindFirstValue(ClaimTypes.Name);
+            var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+            Cart Cart1 = _context.Carts.Where(C => C.UserID == user_id).FirstOrDefault();
             int CartIDD = Cart1.ID;
             foreach (var item in UpdatingProduct)
             {
@@ -110,37 +110,38 @@ namespace API_Project.Controllers
         }
         //********************************************ADD TO CART FUNCTION**********************************************************
         // POST: api/Carts
-
-        [HttpPost("{id}")]
-
-        public async Task<ActionResult> PostToCart(int Product_id)
+        [Route("postToCart/{Product_id}/{quntity}")]
+        [HttpPost]
+        
+        public async Task<ActionResult> PostToCart(int Product_id,int quntity)
         {
             try
             {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
 
-                #region extra
-                //        if (Cart1 == null)
-                //        {
-                //            Cart NewCart = new Cart() { UserID = Cart1.UserID };
-                //            _context.Carts.Add(Cart1);
-                //            await _context.SaveChangesAsync();
-                //            Cart1.UserID = NewCart.UserID;
-                //            Cart1.ID = NewCart.ID;
-                //        }
-                //        Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
-                //        if (ProductAdded == null)
-                //        {
-                //            return BadRequest(new Response { Status = "Error", Message = "product Null!" });
-                //        }
-                //        ProductInCart P = new ProductInCart()
-                //        {
-                //            CartId = Cart1.ID,
-                //            Quantity = 1
+                if (Cart1 == null)
+                {
+                    Cart NewCart = new Cart() { UserID = Cart1.UserID };
+                    _context.Carts.Add(Cart1);
+                    await _context.SaveChangesAsync();
+                    Cart1.UserID = NewCart.UserID;
+                    Cart1.ID = NewCart.ID;
+                }
+                Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
+                if (ProductAdded == null)
+                {
+                    return BadRequest(new Response { Status = "Error", Message = "product Null!" });
+                }
+                ProductInCart P = new ProductInCart()
+                {
+                    CartId = Cart1.ID,
+                    Quantity = quntity
+                };
 
-                //}; 
-                #endregion
+                
+                
                 return Ok(new Response { Status = "Success", Message = "product added successfully!" });
             }
             catch (Exception ex)
@@ -160,7 +161,8 @@ namespace API_Project.Controllers
 
             try
             {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                 int CartIDD = Cart1.ID;
                 var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == Product_id && p.CartID == CartIDD).FirstOrDefault();
@@ -184,8 +186,9 @@ namespace API_Project.Controllers
 
                 try
                 {
-                    string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                     int CartIDD = Cart1.ID;
                     var ProductsOfCart = _context.Product_In_Carts.Where(d => d.CartID == CartIDD).ToList();
                     foreach (var ProductItem in ProductsOfCart)
