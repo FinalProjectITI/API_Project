@@ -33,7 +33,6 @@ namespace API_Project
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
             services.AddCors();
             services.AddCors(options =>
             {
@@ -47,10 +46,11 @@ namespace API_Project
             });
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
+            services.AddHttpContextAccessor();
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
             services.AddDbContext<AlaslyFactoryContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
-            //for repo pattern
+    options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
+            /////////
             services.AddScoped<IProductRepo, ProductRepo>();
             // For Identity  
 
@@ -93,8 +93,9 @@ namespace API_Project
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API_Project v1"));
             }
-            
+
             app.UseRouting();
+            ////cors
             app.UseCors();
             app.UseCors(builder =>
             {
@@ -103,9 +104,12 @@ namespace API_Project
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             });
+            ///
+
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

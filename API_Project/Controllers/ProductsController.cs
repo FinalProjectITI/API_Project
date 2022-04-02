@@ -61,12 +61,22 @@ namespace API_Project.Controllers
            
         }
 
+
         [Route("GetCount/{categoryId}")]
         [HttpGet]
         public ActionResult<int> GetCount(int categoryId)
         {
             return _productRepo.GetCount(categoryId);
+}
+        [Route("GetSimilar/{typeId}/{categoryId}/{productId}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSimilarProducts(int typeId, int categoryId, int productId)
+        {
+            return await _productRepo.GetSimilarProducts(typeId, categoryId, productId);
+
         }
+
+
 
     }
 }
