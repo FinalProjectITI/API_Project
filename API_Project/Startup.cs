@@ -1,4 +1,6 @@
 using API_Project.Models;
+using API_Project.Repository;
+using API_Project.Repository.ProductRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +33,7 @@ namespace API_Project
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddCors();
             services.AddCors(options =>
             {
@@ -47,7 +50,10 @@ namespace API_Project
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
             services.AddDbContext<AlaslyFactoryContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
+            //for repo pattern
+            services.AddScoped<IProductRepo, ProductRepo>();
             // For Identity  
+
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();

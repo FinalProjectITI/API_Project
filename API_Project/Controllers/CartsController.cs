@@ -133,8 +133,8 @@ namespace API_Project.Controllers
                     CartId = Cart1.ID,
                     Quantity = quntity,
 
-                };
-                await _context.SaveChangesAsync();
+                //}; 
+                #endregion
                 return Ok(new Response { Status = "Success", Message = "product added successfully!" });
             }
             catch (Exception ex)
@@ -142,10 +142,10 @@ namespace API_Project.Controllers
                 return BadRequest(ex.Message);
             }
 
-
-
         }
-        //****************************************DELETE FROM CART FUNCTION*************************************************************************
+
+        //}
+        ////****************************************DELETE FROM CART FUNCTION*************************************************************************
 
         // DELETE: api/Carts/5
         [HttpDelete("{id}")]
