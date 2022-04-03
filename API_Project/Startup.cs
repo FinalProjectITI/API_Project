@@ -103,7 +103,7 @@ namespace API_Project
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             });
-            app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
