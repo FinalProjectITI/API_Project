@@ -7,10 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace API_Project.Repository.ProductRepo
 {
-    public class ProductRepo : IProductRepo
+    public class ProductRepo : ControllerBase, IProductRepo
     {
         private readonly AlaslyFactoryContext _context;
         private readonly IMapper _mapper;
@@ -18,7 +19,8 @@ namespace API_Project.Repository.ProductRepo
         {
             _context = context;
             _mapper = mapper;
-    }
+        }
+        #region Get One Product
         public async Task<ActionResult<ProductVM>> GetProduct(int id)
         {
             try
@@ -28,7 +30,7 @@ namespace API_Project.Repository.ProductRepo
 
                 if (product == null)
                 {
-                    return new NotFoundResult();
+                    return NotFound(new Response { Status = "Error", Message = "No Product Found" });
                 }
 
                 ProductVM productVM = _mapper.Map<ProductVM>(product);
@@ -41,7 +43,7 @@ namespace API_Project.Repository.ProductRepo
                 productVM.Season = _context.Seasons.Find(product.SeasonID).Name;
 
 
-                return productVM;
+                return Ok(productVM);
             }
             catch (Exception)
             {
@@ -50,15 +52,18 @@ namespace API_Project.Repository.ProductRepo
             }
         }
 
+        #endregion
+
+        #region Get 20 Products
         public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId)
         {
-             try
+            try
             {
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
                 List<Product> products = await _context.Products.Where(P => P.CategoryID == categoryId)
                     .Skip(start).Take(20).ToListAsync();
-               
-                if (products != null)
+
+                if (products != null && products.Count > 0)
                 {
                     foreach (var product in products)
                     {
@@ -73,10 +78,10 @@ namespace API_Project.Repository.ProductRepo
 
                         ProductsWithImage.Add(productVM);
                     }
-                    return ProductsWithImage;
+                    return Ok(ProductsWithImage);
                 }
                 else
-                    return new NotFoundResult();
+                    return NotFound(new Response { Status = "Error", Message = "No Products Found" });
             }
             catch (Exception)
             {
@@ -85,6 +90,9 @@ namespace API_Project.Repository.ProductRepo
             }
         }
 
+        #endregion
+
+        #region Show in home products
         public async Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome()
         {
             try
@@ -94,7 +102,7 @@ namespace API_Project.Repository.ProductRepo
                     .Where(P => P.ShowInHome == true).ToListAsync();
                 //.Skip(start).Take(20).ToListAsync();
 
-                if (products != null)
+                if (products != null && products.Count > 0)
                 {
                     foreach (var product in products)
                     {
@@ -109,10 +117,10 @@ namespace API_Project.Repository.ProductRepo
 
                         ProductsWithImage.Add(productVM);
                     }
-                    return ProductsWithImage;
+                    return Ok(ProductsWithImage);
                 }
                 else
-                    return new NotFoundResult();
+                    return NotFound(new Response { Status = "Error", Message = "No Products To Show" });
             }
             catch (Exception ex)
             {
@@ -121,15 +129,65 @@ namespace API_Project.Repository.ProductRepo
             }
         }
 
-        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey,int start)
+        #endregion
+
+        #region Search
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey, int start)
         {
 
             try
             {
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
                 List<Product> products = await _context.Products
-                    .Where(P => P.Name.Contains(searchKey) )
+                    .Where(P => P.Name.Contains(searchKey))
                     .Skip(start).Take(20).ToListAsync();
+
+                if (products != null && products.Count > 0)
+                {
+                    foreach (var product in products)
+                    {
+                        ProductVM productVM = _mapper.Map<ProductVM>(product);
+
+                        productVM.FirstImage = _context.ProductImages
+                            .Where(P => P.ProductID == product.ID)
+                            .Select(p => p.ImagePath).FirstOrDefault();
+                        productVM.Category = _context.Categories.Find(product.CategoryID).Name;
+                        productVM.Type = _context.Types.Find(product.TypeID).Name;
+                        productVM.Season = _context.Seasons.Find(product.SeasonID).Name;
+
+                        ProductsWithImage.Add(productVM);
+                    }
+                    return Ok(ProductsWithImage);
+                }
+                else
+                    return NotFound(new Response { Status = "Error", Message = "No Products Found" });
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        #endregion
+        #region GetCount
+        public ActionResult< int>  GetCount(int categoryId)
+        {
+            int count = _context.Products.Where(P => P.CategoryID == categoryId).Count();
+            if(count>0)
+            return Ok(count);
+            else
+                return NotFound(new Response { Status = "Error", Message = "No Products Found" });
+}
+        #endregion
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSimilarProducts(int typeId, int categoryId, int productId)
+        {
+            try
+            {
+                List<ProductVM> ProductsWithImage = new List<ProductVM>();
+                List<Product> products = await _context.Products.Where(P => P.ID != productId && P.CategoryID == categoryId && P.TypeID == typeId)
+                    .Take(4).ToListAsync();
 
                 if (products != null)
                 {
@@ -153,9 +211,10 @@ namespace API_Project.Repository.ProductRepo
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
+
     }
 }

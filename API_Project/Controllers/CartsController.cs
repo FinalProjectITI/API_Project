@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using API_Project.ViewModel;
 using System.Security.Claims;
@@ -15,7 +17,6 @@ namespace API_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class CartsController : ControllerBase
     {
         private AlaslyFactoryContext _context;
@@ -274,4 +275,3 @@ namespace API_Project.Controllers
 
 
 }
-    
