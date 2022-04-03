@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace API_Project.Models
@@ -43,6 +44,7 @@ namespace API_Project.Models
         [InverseProperty("Products")]
         public virtual Type Type { get; set; }
         [InverseProperty(nameof(Favourit.Product))]
+        [JsonIgnore]
         public virtual ICollection<Favourit> Favourits { get; set; }
         [InverseProperty(nameof(ProductImage.Product))]
         public virtual ICollection<ProductImage> ProductImages { get; set; }
