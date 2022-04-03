@@ -10,9 +10,10 @@ namespace API_Project.ViewModel
         public List <ProductCartMV> ProductsVCart {get;set;}
         public int TotalCartPrice { get; set; }
 
-        internal void add(ProductCartMV productCartMVV)
+       /* internal void add(ProductCartMV productCartMVV)
         {
             throw new NotImplementedException();
         }
+       */
     }
 }

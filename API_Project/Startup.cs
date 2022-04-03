@@ -103,9 +103,11 @@ namespace API_Project
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             });
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseAuthorization();
+          
+
 
             app.UseEndpoints(endpoints =>
             {
