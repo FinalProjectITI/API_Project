@@ -17,6 +17,7 @@ namespace API_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CartsController : ControllerBase
     {
         private AlaslyFactoryContext _context;

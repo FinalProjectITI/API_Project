@@ -14,7 +14,7 @@ namespace API_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class FavouritsController : ControllerBase
     {
         private readonly AlaslyFactoryContext _context;
@@ -27,12 +27,12 @@ namespace API_Project.Controllers
         // GET: api/Favourits
         [HttpGet]
         public async Task<ActionResult <IEnumerable<Product>>> GetFavourits()
-        { 
-        //{
-        //    string userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
-        //    string userName = User.FindFirstValue(ClaimTypes.Name); // will give the 
-            
-            List<Favourit> items = _context.Favourits.Where(p => p.UserID == "1").ToList();
+        {
+
+            string UserName = User.FindFirstValue(ClaimTypes.Name);
+            var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+
+            List<Favourit> items = _context.Favourits.Where(p => p.UserID == user_id).ToList();
             List<Product> products = new List<Product>();
             foreach (var item in items)
             {
