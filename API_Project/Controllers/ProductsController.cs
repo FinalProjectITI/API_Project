@@ -27,19 +27,38 @@ namespace API_Project.Controllers
         [Route("GetProducts/{start}/{categoryId}")]
         [HttpGet]
         
-        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId)
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId,int typeId=-1)
         {
-           
-            return await  _productRepo.GetProducts(start, categoryId);
+           if(typeId!=-1)
+            {
+                return await _productRepo.GetProducts(start, categoryId,P=>P.TypeID==typeId);
+            }
+           else
+            {
+                return await _productRepo.GetProducts(start, categoryId);
+            }
+            
 
         }
 
         //
         [Route("search/{searchKey}/{start}")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey, int start)
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey, int start, int categoryId=-1, int typeId = -1)
         {
-            return await _productRepo.GetSearchResult(searchKey,start);
+            if(categoryId!=-1&&typeId!=-1)
+            {
+                return await _productRepo.GetSearchResult(searchKey, start,P=>P.CategoryID==categoryId&&P.TypeID==typeId);
+            }
+            else if(categoryId!=-1)
+            {
+                return await _productRepo.GetSearchResult(searchKey, start, P => P.CategoryID == categoryId );
+            }
+            else
+            {
+                return await _productRepo.GetSearchResult(searchKey, start);
+            }
+            
 
         }
 
