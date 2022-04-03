@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using API_Project.ViewModel;
 using System.Security.Claims;
@@ -15,14 +17,16 @@ namespace API_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class CartsController : ControllerBase
     {
         private AlaslyFactoryContext _context;
+        private IHttpContextAccessor _httpContextAccessor;
+        
 
-        public CartsController(AlaslyFactoryContext context)
+        public CartsController(AlaslyFactoryContext context,IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/Cart
@@ -33,41 +37,78 @@ namespace API_Project.Controllers
             try
             {
 
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                List<string> img = new List<string> { "img1", "img2" };
+                if (Cart1==null)
+                {
+                    return BadRequest("cart is null");
+
+
+                }
                 int CartIDD = Cart1.ID;
                 var ListOfProduct = _context.Product_In_Carts.Where(p => p.CartID == CartIDD).ToList();
                 CartDetalisMV cartview = new CartDetalisMV();
+                List<ProductCartMV> ProductsVCartt = new List<ProductCartMV>();
+                cartview.ProductsVCart = ProductsVCartt;
+
+
                 cartview.TotalCartPrice = 0;
                 foreach (var item in ListOfProduct)
                 {
                     
                     ProductVM productVMM = new ProductVM();
                     productVMM.Quntity = item.quantity;
-                    productVMM.Price = item.Product.Price;
-                    productVMM.Name = item.Product.Name;
-                    productVMM.ID = item.Product.ID;
-                    productVMM.Images = (List<string>)item.Product.ProductImages;
-                    productVMM.Category = item.Product.Category.Name;
-                    productVMM.Season = item.Product.Season.Name;
+                    productVMM.ID = item.ProductID;
+                    var product = _context.Products.FirstOrDefault(p => p.ID == item.ProductID);
+                    productVMM.Name = product.Name;
+                    productVMM.CategoryID = product.CategoryID;
+                    var categoryT = _context.Categories.FirstOrDefault(c => c.ID == product.CategoryID);
+                    productVMM.Category = categoryT.Name;
+                    productVMM.SeasonID = product.SeasonID;
+                    var seassonT = _context.Seasons.FirstOrDefault(s => s.ID == product.SeasonID);
+                    productVMM.Season = seassonT.Name;
+                    productVMM.Price = (double)(product.Price - product.Discount);
+                    productVMM.Description = product.Description;
+                    productVMM.TypeID = product.TypeID;
+                    var TypeT = _context.Types.FirstOrDefault(T => T.ID == product.TypeID);
+                    productVMM.Type = TypeT.Name;
+                    productVMM.FirstImage = _context.ProductImages
+                            .Where(P => P.ProductID == item.ProductID)
+                            .Select(p => p.ImagePath).FirstOrDefault();
+                    //productVMM.Images = _context.ProductImages
+                    //        .Where(P => P.ProductID == item.ProductID)
+                    //        .Select(p => p.ImagePath).ToList();
+                    //productVMM.ShowInHome = true;
+                    productVMM.Discount = product.Discount;
 
-                    
+
+
+
+
 
                     //product should appear on cart
                     ProductCartMV productCartMVV = new ProductCartMV();
                     productCartMVV.ProductVM = productVMM;
                     productCartMVV.QuntityOfProduct = productVMM.Quntity;
                     productCartMVV.TotalPrice = (int)(productCartMVV.QuntityOfProduct * productVMM.Price);
-                 
+                    
 
                     //cart detalis vew
-                    cartview.TotalCartPrice = 2000;
-                    cartview.ProductsVCart.Add(productCartMVV);
+                    cartview.TotalCartPrice += productCartMVV.TotalPrice;
+                    /* cartview.ProductsVCart.Add(productCartMVV);*/
+                    ProductsVCartt.Add(productCartMVV);
+
+
+
+
 
 
                 }
+                return Ok(cartview);
 
-                return cartview;
+
             }
             catch (Exception ex)
             {
@@ -83,61 +124,85 @@ namespace API_Project.Controllers
         [Route("UpdateCart")]
         public IActionResult PutCart([FromBody] List<ProductIds> UpdatingProduct)
         {
-
-            string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
-            int CartIDD = Cart1.ID;
-            foreach (var item in UpdatingProduct)
+            try
             {
-                var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == item.ProductID && p.CartID == CartIDD).FirstOrDefault();
-                if (item.Quntity > 0)
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+                Cart Cart1 = _context.Carts.Where(C => C.UserID == user_id).FirstOrDefault();
+                int CartIDD = Cart1.ID;
+                foreach (var item in UpdatingProduct)
                 {
-                    ProductOfCart.quantity = item.Quntity;
-                    _context.SaveChanges();
+                    var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == item.ProductID && p.CartID == CartIDD).FirstOrDefault();
+                    if (item.Quntity > 0)
+                    {
+                        ProductOfCart.quantity = item.Quntity;
+                        _context.SaveChanges();
+                    }
+                    else
+                        return BadRequest(new Response { Status = "Erro", Message = "quntity no valid successfully!" });
                 }
-                else
-                    return BadRequest(new Response { Status = "Erro", Message = "quntity no valid successfully!" });
+
+
+
+                return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
 
-
-            return Ok(new Response { Status = "Success", Message = "product added successfully!" });
         }
         //********************************************ADD TO CART FUNCTION**********************************************************
         // POST: api/Carts
 
-        [HttpPost("{id}")]
 
-        public async Task<ActionResult> PostToCart(int Product_id)
+        [HttpPost]
+        [Route("AddProductToCart")]
+        
+        public async Task<ActionResult> PostToCart(ProductIds productIdsvm)
         {
             try
             {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                Cart NewCart = new Cart();
 
-                #region extra
-                //        if (Cart1 == null)
-                //        {
-                //            Cart NewCart = new Cart() { UserID = Cart1.UserID };
-                //            _context.Carts.Add(Cart1);
-                //            await _context.SaveChangesAsync();
-                //            Cart1.UserID = NewCart.UserID;
-                //            Cart1.ID = NewCart.ID;
-                //        }
-                //        Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == Product_id);
-                //        if (ProductAdded == null)
-                //        {
-                //            return BadRequest(new Response { Status = "Error", Message = "product Null!" });
-                //        }
-                //        ProductInCart P = new ProductInCart()
-                //        {
-                //            CartId = Cart1.ID,
-                //            Quantity = 1
 
-                //}; 
-                #endregion
-                return Ok(new Response { Status = "Success", Message = "product added successfully!" });
-            }
+
+                if (Cart1 == null)
+                {
+                    NewCart.UserID = user_id;
+                    _context.Carts.Add(NewCart);
+                    await _context.SaveChangesAsync();
+
+                }
+                Product ProductAdded = _context.Products.FirstOrDefault(p => p.ID == productIdsvm.ProductID);
+                if (ProductAdded == null)
+                {
+                    return BadRequest(new Response { Status = "Error", Message = "product Null!" });
+                }
+
+                Product_In_Cart Pro = new Product_In_Cart()
+                {
+                    ProductID = ProductAdded.ID,
+                    CartID = Cart1.ID,
+                    quantity = productIdsvm.Quntity,
+                  
+
+                      };
+                _context.Product_In_Carts.Add(Pro);
+
+
+                await _context.SaveChangesAsync();
+
+
+
+
+                    return Ok(new Response { Status = "Success", Message = "product added successfully!" });
+                }
+            
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -149,16 +214,18 @@ namespace API_Project.Controllers
         ////****************************************DELETE FROM CART FUNCTION*************************************************************************
 
         // DELETE: api/Carts/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFromCart(int Product_id)
+        [HttpDelete]
+        [Route("DeleteProduct")]
+        public async Task<IActionResult> DeleteFromCart([FromBody]int product_id)
         {
 
             try
             {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
                 Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                 int CartIDD = Cart1.ID;
-                var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == Product_id && p.CartID == CartIDD).FirstOrDefault();
+                var ProductOfCart = _context.Product_In_Carts.Where(p => p.ProductID == product_id && p.CartID == CartIDD).FirstOrDefault();
                 _context.Product_In_Carts.Remove(ProductOfCart);
 
                 await _context.SaveChangesAsync();
@@ -174,13 +241,15 @@ namespace API_Project.Controllers
         }
         ////***********************************************************Delete CART***************************************************************************
         [HttpDelete]
+        [Route("DeleteCart")]
             public IActionResult DeleteCart()
             {
 
                 try
                 {
-                    string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
+                string UserName = User.FindFirstValue(ClaimTypes.Name);
+                var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+                Cart Cart1 = _context.Carts.FirstOrDefault(C => C.UserID == user_id);
                     int CartIDD = Cart1.ID;
                     var ProductsOfCart = _context.Product_In_Carts.Where(d => d.CartID == CartIDD).ToList();
                     foreach (var ProductItem in ProductsOfCart)
@@ -206,4 +275,3 @@ namespace API_Project.Controllers
 
 
 }
-    

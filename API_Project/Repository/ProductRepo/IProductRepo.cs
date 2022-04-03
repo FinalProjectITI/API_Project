@@ -9,11 +9,14 @@ namespace API_Project.Repository
 {
    public interface IProductRepo
     {
-          Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId);
-         Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome();
-        Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey,int start);
 
+        Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId);
+        Task<ActionResult<IEnumerable<ProductVM>>> GetProductsInHome();
+        Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey,int start);
         Task<ActionResult<ProductVM>> GetProduct(int id);
+        Task<ActionResult<IEnumerable<ProductVM>>> GetSimilarProducts(int typeId, int categoryId, int productId);
+
+        public ActionResult<int> GetCount(int categoryId);
 
 
     }
