@@ -1,4 +1,6 @@
 using API_Project.Models;
+using API_Project.Repository;
+using API_Project.Repository.ProductRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,13 +33,28 @@ namespace API_Project
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.WithOrigins()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
+                    });
+            });
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
             services.AddHttpContextAccessor();
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
             services.AddDbContext<AlaslyFactoryContext>(options =>
-    options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
+                    options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
+            //for repo pattern
+            services.AddScoped<IProductRepo, ProductRepo>();
             // For Identity  
+
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -77,13 +94,20 @@ namespace API_Project
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API_Project v1"));
             }
-
-            app.UseRouting();
-
             app.UseAuthentication();
+            app.UseRouting();
+            app.UseCors();
+            app.UseCors(builder =>
+            {
+                builder
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+                
+            });
             app.UseAuthorization();
 
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

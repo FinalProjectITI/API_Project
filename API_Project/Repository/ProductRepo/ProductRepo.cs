@@ -133,6 +133,7 @@ namespace API_Project.Repository.ProductRepo
 
                 if (products != null)
                 {
+                    
                     foreach (var product in products)
                     {
                         ProductVM productVM = _mapper.Map<ProductVM>(product);
