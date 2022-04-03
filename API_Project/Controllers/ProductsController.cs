@@ -9,6 +9,7 @@ using API_Project.Models;
 using AutoMapper;
 using API_Project.ViewModel;
 using API_Project.Repository;
+using System.Net.Mime;
 
 namespace API_Project.Controllers
 {
@@ -25,9 +26,11 @@ namespace API_Project.Controllers
         // GET: api/Products
         [Route("GetProducts/{start}/{categoryId}")]
         [HttpGet]
+        
         public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId)
         {
-            return await _productRepo.GetProducts(start, categoryId);
+           
+            return await  _productRepo.GetProducts(start, categoryId);
 
         }
 
@@ -58,6 +61,23 @@ namespace API_Project.Controllers
            
         }
 
+
+        [Route("GetCount/{categoryId}")]
+        [HttpGet]
+        public ActionResult<int> GetCount(int categoryId)
+        {
+            return _productRepo.GetCount(categoryId);
+}
+        [Route("GetSimilar/{typeId}/{categoryId}/{productId}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSimilarProducts(int typeId, int categoryId, int productId)
+        {
+            return await _productRepo.GetSimilarProducts(typeId, categoryId, productId);
+
+        }
+
+
+
     }
-    }
+}
 
