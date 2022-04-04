@@ -31,7 +31,7 @@ namespace API_Project.Controllers
         {
            if(typeId!=-1)
             {
-                return await _productRepo.GetProducts(start, categoryId,P=>P.TypeID==typeId);
+                return await _productRepo.GetProducts(start, categoryId);//,P=>P.TypeID==typeId);
             }
            else
             {

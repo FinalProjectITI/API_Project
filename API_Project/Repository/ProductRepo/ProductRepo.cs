@@ -58,7 +58,7 @@ namespace API_Project.Repository.ProductRepo
         #endregion
 
         #region Get 12 Products
-        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId)
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId, Expression<Func<Product, bool>> filter = null)
         {
             try
             {
