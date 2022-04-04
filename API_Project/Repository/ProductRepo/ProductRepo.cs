@@ -54,14 +54,14 @@ namespace API_Project.Repository.ProductRepo
 
         #endregion
 
-        #region Get 20 Products
+        #region Get 12 Products
         public async Task<ActionResult<IEnumerable<ProductVM>>> GetProducts(int start, int categoryId)
         {
             try
             {
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
                 List<Product> products = await _context.Products.Where(P => P.CategoryID == categoryId)
-                    .Skip(start).Take(20).ToListAsync();
+                    .Skip(start).Take(12).ToListAsync();
 
                 if (products != null && products.Count > 0)
                 {
