@@ -94,7 +94,7 @@ namespace API_Project
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API_Project v1"));
             }
-
+            app.UseAuthentication();
             app.UseRouting();
             ////cors
             app.UseCors();
@@ -106,12 +106,9 @@ namespace API_Project
                 .AllowAnyMethod();
                 
             });
-            ///
-
-
             app.UseAuthentication();
-            app.UseAuthorization();
 
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

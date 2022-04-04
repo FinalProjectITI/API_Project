@@ -7,11 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_Project.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace API_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FavouritsController : ControllerBase
     {
         private readonly AlaslyFactoryContext _context;
@@ -23,12 +26,26 @@ namespace API_Project.Controllers
 
         // GET: api/Favourits
         [HttpGet]
-  
-        public async Task<IEnumerable<Favourit>> GetFavourits()
+        public async Task<ActionResult <IEnumerable<Product>>> GetFavourits()
         {
-            
-            return await _context.Favourits.ToListAsync();
+
+            string UserName = User.FindFirstValue(ClaimTypes.Name);
+            var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+
+            List<Favourit> items = _context.Favourits.Where(p => p.UserID == user_id).ToList();
+            List<Product> products = new List<Product>();
+            foreach (var item in items)
+            {
+                Product p = _context.Products.FirstOrDefault(p => p.ID == item.ProductID);
+                products.Add(p);
+            }
+            return  products;
         }
+        //public async Task<IEnumerable<Favourit>> GetFavourits()
+        //{
+
+        //    return await _context.Favourits.ToListAsync();
+        //}
 
         // GET: api/Favourits/5
         //[HttpGet("{id}")]
@@ -46,8 +63,8 @@ namespace API_Project.Controllers
 
         // PUT: api/Favourits/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-       // [HttpPut("{id}")]
-        
+        // [HttpPut("{id}")]
+
 
         // POST: api/Favourits
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

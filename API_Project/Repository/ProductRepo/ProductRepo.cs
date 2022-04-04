@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -15,10 +16,12 @@ namespace API_Project.Repository.ProductRepo
     {
         private readonly AlaslyFactoryContext _context;
         private readonly IMapper _mapper;
+        private readonly DbSet<Product> _dbSet;
         public ProductRepo(AlaslyFactoryContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
+            _dbSet = context.Products;
         }
         #region Get One Product
         public async Task<ActionResult<ProductVM>> GetProduct(int id)
@@ -59,6 +62,12 @@ namespace API_Project.Repository.ProductRepo
         {
             try
             {
+                IQueryable<Product> query = _dbSet;
+
+                if (filter != null)
+                {
+                    query = query.Where(filter);
+                }
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
                 List<Product> products = await _context.Products.Where(P => P.CategoryID == categoryId)
                     .Skip(start).Take(12).ToListAsync();
@@ -132,13 +141,19 @@ namespace API_Project.Repository.ProductRepo
         #endregion
 
         #region Search
-        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey, int start)
+        public async Task<ActionResult<IEnumerable<ProductVM>>> GetSearchResult(string searchKey, int start, Expression<Func<Product, bool>> filter = null)
         {
 
             try
             {
+                IQueryable<Product> query = _dbSet;
+
+                if (filter != null)
+                {
+                    query = query.Where(filter);
+                }
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
-                List<Product> products = await _context.Products
+                List<Product> products = await query
                     .Where(P => P.Name.Contains(searchKey))
                     .Skip(start).Take(20).ToListAsync();
 
@@ -191,6 +206,7 @@ namespace API_Project.Repository.ProductRepo
 
                 if (products != null)
                 {
+                    
                     foreach (var product in products)
                     {
                         ProductVM productVM = _mapper.Map<ProductVM>(product);
