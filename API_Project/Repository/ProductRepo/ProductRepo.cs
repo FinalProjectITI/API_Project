@@ -201,7 +201,7 @@ namespace API_Project.Repository.ProductRepo
             try
             {
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
-                List<Product> products = await _context.Products.Where(P => P.ID != productId && P.CategoryID == categoryId && P.TypeID == typeId)
+                List<Product> products = await _context.Products.Where(P => P.ID != productId && P.TypeID == typeId)
                     .Take(4).ToListAsync();
 
                 if (products != null)
