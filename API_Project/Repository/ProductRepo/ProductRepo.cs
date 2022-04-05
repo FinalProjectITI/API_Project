@@ -155,7 +155,7 @@ namespace API_Project.Repository.ProductRepo
                 List<ProductVM> ProductsWithImage = new List<ProductVM>();
                 List<Product> products = await query
                     .Where(P => P.Name.Contains(searchKey))
-                    .Skip(start).Take(20).ToListAsync();
+                    .Skip(start).Take(12).ToListAsync();
 
                 if (products != null && products.Count > 0)
                 {
@@ -189,13 +189,45 @@ namespace API_Project.Repository.ProductRepo
         #region GetCount
         public ActionResult< int>  GetCount(int categoryId)
         {
-            int count = _context.Products.Where(P => P.CategoryID == categoryId).Count();
-            if(count>0)
-            return Ok(count);
-            else
-                return NotFound(new Response { Status = "Error", Message = "No Products Found" });
+            try
+            {
+
+                int count = _context.Products.Where(P => P.CategoryID == categoryId).Count();
+                if (count > 0)
+                    return Ok(count);
+                else
+                    return NotFound(new Response { Status = "Error", Message = "No Products Found" });
+
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
 }
+        ////////////
+        public  ActionResult<int> GetCount( string searchKey, Expression<Func<Product, bool>> filter = null)
+        {
+            try
+            {
+                int count = _context.Products
+                .Where(P => P.Name.Contains(searchKey)).Count();
+                if (count > 0)
+                    return Ok(count);
+                else
+                    return NotFound(new Response { Status = "Error", Message = "No Products Found" });
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         #endregion
+
+        #region Get Smiliar
         public async Task<ActionResult<IEnumerable<ProductVM>>> GetSimilarProducts(int typeId, int categoryId, int productId)
         {
             try
@@ -206,7 +238,7 @@ namespace API_Project.Repository.ProductRepo
 
                 if (products != null)
                 {
-                    
+
                     foreach (var product in products)
                     {
                         ProductVM productVM = _mapper.Map<ProductVM>(product);
@@ -231,6 +263,7 @@ namespace API_Project.Repository.ProductRepo
             }
         }
 
-
+        #endregion
+       
     }
 }

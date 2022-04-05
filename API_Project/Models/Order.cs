@@ -22,6 +22,9 @@ namespace API_Project.Models
         [Required]
         public string Address { get; set; }
         public bool PaymentMethod { get; set; }
+        [Required]
+        [StringLength(12)]
+        public string Phone { get; set; }
 
         [ForeignKey(nameof(CartID))]
         [InverseProperty("Orders")]

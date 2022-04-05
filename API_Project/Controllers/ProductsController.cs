@@ -31,7 +31,7 @@ namespace API_Project.Controllers
         {
            if(typeId!=-1)
             {
-                return await _productRepo.GetProducts(start, categoryId);//,P=>P.TypeID==typeId);
+                return await _productRepo.GetProducts(start, categoryId,P=>P.TypeID==typeId);
             }
            else
             {
@@ -86,7 +86,15 @@ namespace API_Project.Controllers
         public ActionResult<int> GetCount(int categoryId)
         {
             return _productRepo.GetCount(categoryId);
-}
+        }
+
+        [Route("GetSearchResultCount/{searchKey}")]
+        [HttpGet]
+        public ActionResult<int> GetCount(int categoryId,string searchKey)
+        {
+            return _productRepo.GetCount( searchKey);
+        }
+
         [Route("GetSimilar/{typeId}/{categoryId}/{productId}")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductVM>>> GetSimilarProducts(int typeId, int categoryId, int productId)
