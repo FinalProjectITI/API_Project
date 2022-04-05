@@ -9,6 +9,8 @@ using API_Project.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
+using API_Project.ViewModel;
+using AutoMapper;
 
 namespace API_Project.Controllers
 {
@@ -18,60 +20,44 @@ namespace API_Project.Controllers
     public class FavouritsController : ControllerBase
     {
         private readonly AlaslyFactoryContext _context;
+        private IMapper _Maper { get; set; }
 
-        public FavouritsController(AlaslyFactoryContext context)
+        public FavouritsController(AlaslyFactoryContext context,IMapper maper)
         {
             _context = context;
+            _Maper = maper;
         }
 
         // GET: api/Favourits
         [HttpGet]
-        public async Task<ActionResult <IEnumerable<Product>>> GetFavourits()
+        public async Task<ActionResult <IEnumerable<ProductVM>>> GetFavourits()
         {
-
+             
             string UserName = User.FindFirstValue(ClaimTypes.Name);
             var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
 
             List<Favourit> items = _context.Favourits.Where(p => p.UserID == user_id).ToList();
-            List<Product> products = new List<Product>();
+            List<ProductVM> products = new List<ProductVM>();
             foreach (var item in items)
             {
-                Product p = _context.Products.FirstOrDefault(p => p.ID == item.ProductID);
+                ProductVM p =_Maper.Map<ProductVM>(_context.Products.FirstOrDefault(p => p.ID == item.ProductID));
                 products.Add(p);
             }
+            
             return  products;
         }
-        //public async Task<IEnumerable<Favourit>> GetFavourits()
-        //{
 
-        //    return await _context.Favourits.ToListAsync();
-        //}
-
-        // GET: api/Favourits/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Favourit>> GetFavourit(int id)
-        //{
-        //    var favourit = await _context.Favourits.FindAsync(id);
-
-        //    if (favourit == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return favourit;
-        //}
-
-        // PUT: api/Favourits/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        // [HttpPut("{id}")]
-
-
-        // POST: api/Favourits
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Favourit>> PostFavourit(Favourit favourit)
+        public async Task<ActionResult<Favourit>> PostFavourit(int ProductID)
         {
-            _context.Favourits.Add(favourit);
+            string UserName = User.FindFirstValue(ClaimTypes.Name);
+            var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+            Favourit favourit = new Favourit
+            {
+                UserID = user_id,
+                ProductID = ProductID};
+             _context.Favourits.Add(favourit);
             try
             {
                 await _context.SaveChangesAsync();
@@ -95,12 +81,13 @@ namespace API_Project.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFavourit(int id)
         {
-            var favourit = await _context.Favourits.FindAsync(id);
+            string UserName = User.FindFirstValue(ClaimTypes.Name);
+            var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
+            Favourit favourit = await _context.Favourits.FirstAsync(f=>f.UserID==user_id&&f.ProductID==id);
             if (favourit == null)
             {
                 return NotFound();
             }
-
             _context.Favourits.Remove(favourit);
             await _context.SaveChangesAsync();
 

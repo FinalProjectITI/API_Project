@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace API_Project.Models
@@ -25,7 +26,9 @@ namespace API_Project.Models
 
         [ForeignKey(nameof(CartID))]
         [InverseProperty("Orders")]
+        [JsonIgnore]
         public virtual Cart Cart { get; set; }
+        [JsonIgnore]
         [ForeignKey(nameof(UserID))]
         [InverseProperty(nameof(AspNetUser.Orders))]
         public virtual AspNetUser User { get; set; }

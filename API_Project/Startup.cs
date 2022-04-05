@@ -40,7 +40,7 @@ namespace API_Project
                     builder =>
 
                     {
-                        builder.WithOrigins()
+                        builder.WithOrigins().AllowAnyOrigin()
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                     });
