@@ -102,8 +102,9 @@ namespace API_Project
             {
                 builder
                 .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+                
             });
             app.UseAuthentication();
 

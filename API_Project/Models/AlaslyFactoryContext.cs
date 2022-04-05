@@ -104,6 +104,10 @@ namespace API_Project.Models
 
             modelBuilder.Entity<Order>(entity =>
             {
+                entity.Property(e => e.Phone)
+                    .IsUnicode(false)
+                    .IsFixedLength(true);
+
                 entity.HasOne(d => d.Cart)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CartID)

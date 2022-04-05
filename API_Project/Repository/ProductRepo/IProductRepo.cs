@@ -19,6 +19,7 @@ namespace API_Project.Repository
         Task<ActionResult<IEnumerable<ProductVM>>> GetSimilarProducts(int typeId, int categoryId, int productId);
 
         public ActionResult<int> GetCount(int categoryId);
+        public ActionResult<int> GetCount(string searchKey, Expression<Func<Product, bool>> filter = null);
 
 
     }
