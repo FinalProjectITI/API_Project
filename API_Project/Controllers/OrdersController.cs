@@ -14,7 +14,7 @@ namespace API_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly AlaslyFactoryContext _context;
@@ -30,7 +30,7 @@ namespace API_Project.Controllers
         {
             string UserName = User.FindFirstValue(ClaimTypes.Name);
             var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
-            return await _context.Orders.Where(o=>o.UserID=="1"&&o.status==1||o.status==2).ToListAsync();
+            return await _context.Orders.Where(o=>o.UserID=="1"&&o.status==1||o.status==2||o.status==0).ToListAsync();
         }
 
         // GET: api/Orders/5
