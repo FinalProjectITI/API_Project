@@ -83,7 +83,10 @@ namespace API_Project.Controllers
         [HttpPost]
         public async Task<ActionResult<Order>> PostOrder(Order order)
         {
+            string UserName = User.FindFirstValue(ClaimTypes.Name);
+            var user_id = _context.AspNetUsers.Where(U => U.UserName == UserName).Select(U => U.Id).FirstOrDefault();
             order.status = 1;
+            order.UserID = user_id;
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
